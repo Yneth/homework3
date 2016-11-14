@@ -33,8 +33,54 @@ public final class Lists {
         Objects.requireNonNull(toSort);
         Objects.requireNonNull(cmp);
 
-        sortInner(toSort, 0, toSort.size() - 1, cmp);
+        T[] array = (T[]) new Object[toSort.size()];
+        toSort.toArray(array);
+
+        sortInner(array, 0, toSort.size() - 1, cmp);
+
+        ListIterator<T> iterator = toSort.listIterator();
+        for (T a : array) {
+            iterator.next();
+            iterator.set(a);
+        }
         return toSort;
+    }
+
+    private static <T> void sortInner(T[] toSort, int lo, int hi, Comparator<? super T> cmp) {
+        if (hi <= lo)
+        return;
+
+        int j = partition(toSort, lo, hi, cmp);
+        sortInner(toSort, lo, j - 1, cmp);
+        sortInner(toSort, j + 1, hi, cmp);
+    }
+
+    private static <T> int partition(T[] toSort, int lo, int hi, Comparator<? super T> cmp) {
+        int i = lo;
+        int j = hi + 1;
+        T val = toSort[lo];
+        while (true) {
+            while (less(toSort[++i], val, cmp))
+                if (i >= hi)
+                    break;
+
+            while (less(val, toSort[--j], cmp))
+                if (j <= lo)
+                    break;
+
+            if (i >= j)
+                break;
+
+            swap(toSort, i, j);
+        }
+        swap(toSort, lo, j);
+        return j;
+    }
+
+    private static <T> void swap(T[] array, int i, int j) {
+        T temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
     }
 
     private static <T> void sortInner(List<T> toSort, int lo, int hi, Comparator<? super T> cmp) {
