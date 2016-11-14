@@ -1,4 +1,4 @@
-package ua.abond.generics.util;
+package ua.abond.util;
 
 public class ValueHolder<T> {
     private T value;
