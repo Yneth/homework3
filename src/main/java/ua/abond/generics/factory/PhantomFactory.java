@@ -17,8 +17,6 @@ public abstract class PhantomFactory<T> {
     protected final int maxRefCount;
     protected final ReferenceQueue<T> queue;
 
-    protected int count;
-
     public PhantomFactory(final int maxRefCount) {
         if (maxRefCount <= 0) {
             throw new IllegalArgumentException("MaxRefCount should be > 0.");
@@ -26,35 +24,36 @@ public abstract class PhantomFactory<T> {
 
         this.maxRefCount = maxRefCount;
         this.queue = new ReferenceQueue<>();
-
-        this.count = 0;
     }
 
-    public T create() {
+    public T create() throws InterruptedException {
         while (true) {
-            if (count < maxRefCount) {
-                count++;
+            if (refs.size() < maxRefCount) {
                 return wrap(newInstance());
             }
 
             Reference<? extends T> ref;
             try {
                 ref = queue.remove(TIMEOUT);
-                if (ref == null)
+                if (ref == null) {
+                    System.gc();
                     continue;
-                count--;
+                }
                 refs.remove(ref);
+                ref.clear();
             } catch (InterruptedException e) {
                 LOGGER.error("Failed to remove reference from the queue.", e);
-                Thread.currentThread().interrupt();
+                throw e;
             }
         }
     }
 
-    protected T wrap(T t) {
-        Reference<T> ref = new PhantomReference<>(t, queue);
-        refs.add(ref);
+    public int liveObjectsCount() {
+        return refs.size();
+    }
 
+    protected T wrap(T t) {
+        refs.add(new PhantomReference<>(t, queue));
         return t;
     }
 
