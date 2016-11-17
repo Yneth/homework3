@@ -10,16 +10,11 @@ public class SuppliableFactoryTest {
     @Test
     public void testShouldNotLoop() throws Exception {
         int count = 10;
-
         PhantomFactory<String> factory =
-                new SuppliableFactory<>(count, String.class, () -> new String("sadboy"));
+                SuppliableFactory.create(count, String.class, () -> new String("test test"));
 
         String val = factory.create();
         val = null;
-
-        for (int i = 0; i < GC_COUNT; i++) {
-            System.gc();
-        }
 
         for (int i = 0; i < count; i++) {
             factory.create();
@@ -31,7 +26,7 @@ public class SuppliableFactoryTest {
         int count = 10;
 
         PhantomFactory<NoArg> factory =
-                new SuppliableFactory<>(count, NoArg.class, NoArg::new);
+                SuppliableFactory.create(count, NoArg.class, NoArg::new);
 
         for (int i = 0; i < count << 2; i++) {
             factory.create();
@@ -42,6 +37,6 @@ public class SuppliableFactoryTest {
     @Test(expected = IllegalArgumentException.class)
     public void testBadSupplier() {
         String string = "";
-        new SuppliableFactory<>(10, String.class, () -> string);
+        SuppliableFactory.create(10, String.class, () -> string);
     }
 }
