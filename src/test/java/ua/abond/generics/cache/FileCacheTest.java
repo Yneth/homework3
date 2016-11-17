@@ -70,7 +70,7 @@ public class FileCacheTest {
 
     private Map<Path, Reference<byte[]>> getMap(FileCache cache)
             throws NoSuchFieldException, IllegalAccessException {
-        Field fileCache = cache.getClass().getDeclaredField("fileCache");
+        Field fileCache = cache.getClass().getDeclaredField("cache");
         fileCache.setAccessible(true);
         return (Map<Path, Reference<byte[]>>) fileCache.get(cache);
     }
