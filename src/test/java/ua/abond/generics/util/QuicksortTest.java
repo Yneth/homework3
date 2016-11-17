@@ -13,9 +13,17 @@ public class QuicksortTest {
         Lists.sort(null, null);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testSortWithNullComparator() {
-        Lists.sort(Collections.emptyList(), null);
+    @Test(expected = IllegalArgumentException.class)
+    public void testSortNonComparable() throws Exception {
+        List<A> list = Arrays.asList(new A(), new A(), new A(), new A());
+        Lists.sort(list, null);
+    }
+
+    @Test
+    public void testSortComparable() throws Exception {
+        List<Integer> list = Arrays.asList(10, 1, 100, 10, 22);
+        Lists.sort(list, null);
+        assertTrue(Lists.isSorted(list));
     }
 
     @Test
