@@ -5,13 +5,13 @@ import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class FileCache {
-    private final Map<Path, Reference<byte[]>> fileCache;
+    private final Map<Path, Reference<byte[]>> cache;
 
     public FileCache() {
         this(new HashMap<>());
@@ -23,20 +23,20 @@ public class FileCache {
 
     private FileCache(Map<Path, Reference<byte[]>> map) {
         Objects.requireNonNull(map);
-        this.fileCache = map;
+        this.cache = map;
     }
 
     public byte[] get(Path path) throws IOException {
         Objects.requireNonNull(path);
 
         byte[] result = null;
-        if (fileCache.containsKey(path)) {
-            Reference<byte[]> ref = fileCache.get(path);
+        if (cache.containsKey(path)) {
+            Reference<byte[]> ref = cache.get(path);
             result = ref.get();
             if (result == null) {
                 result = getBytes(path);
                 ref = new SoftReference<>(result);
-                fileCache.replace(path, ref);
+                cache.replace(path, ref);
             }
         }
         return result;
@@ -45,12 +45,12 @@ public class FileCache {
     public void put(Path path) throws IOException {
         Objects.requireNonNull(path);
 
-        if (fileCache.containsKey(path)) {
+        if (cache.containsKey(path)) {
             return;
         }
         byte[] bytes = getBytes(path);
         Reference<byte[]> ref = new SoftReference<>(bytes);
-        fileCache.put(path, ref);
+        cache.put(path, ref);
     }
 
     private byte[] getBytes(Path path) throws IOException {
